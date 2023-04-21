@@ -1,8 +1,8 @@
 use ratatui::{
     buffer::Buffer,
-    layout::{Constraint, Direction, Layout, Rect},
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Style},
-    widgets::{Block, Borders, Paragraph, Widget},
+    widgets::{Block, Borders, Paragraph, Widget, Wrap},
 };
 
 use crate::Day;
@@ -15,6 +15,10 @@ pub struct DayAnime {
 }
 
 impl DayAnime {
+    pub fn new(day: Day) -> DayAnime {
+        DayAnime { day }
+    }
+
     fn get_widget_height(&self) -> u16 {
         let list_len: u16 = self.day.anime.len() as u16;
 
@@ -26,6 +30,7 @@ impl DayAnime {
         ( list_len * ( ITEM_HEIGHT - 1 ) ) +
         // week title height
         WEEK_HEIGHT
+            - 2
     }
 }
 
@@ -61,13 +66,33 @@ impl Widget for DayAnime {
             .constraints(constraints)
             .split(margin[1]);
 
-        Paragraph::new(format!("\n{}", self.day.week)).render(layout[0], buf);
+        Paragraph::new(format!("\n{}", self.day.week))
+            .block(Block::default().borders(Borders::BOTTOM))
+            .render(layout[0], buf);
 
         self.day.anime.iter().enumerate().for_each(|(i, anime)| {
             if layout.get(i + 1).is_some() {
-                Paragraph::new(format!("{}\n{}\n\n{}", anime.time, anime.name, anime.ep))
-                    .block(Block::default().borders(Borders::TOP))
-                    .render(layout[i + 1], buf);
+                let layout = Layout::default()
+                    .constraints([
+                        Constraint::Length(1),
+                        Constraint::Length(2),
+                        Constraint::Length(1),
+                    ])
+                    .split(layout[i + 1]);
+
+                Block::default()
+                    .title(anime.time.to_owned())
+                    .render(layout[0], buf);
+
+                Paragraph::new(anime.name.to_owned())
+                    .wrap(Wrap { trim: true })
+                    .render(layout[1], buf);
+
+                Block::default()
+                    .title(anime.ep.to_owned())
+                    .title_alignment(Alignment::Right)
+                    .borders(Borders::BOTTOM)
+                    .render(layout[2], buf);
             }
         });
 

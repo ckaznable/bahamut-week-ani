@@ -7,15 +7,15 @@ use crossterm::{
 };
 use ratatui::{
     backend::{Backend, CrosstermBackend},
-    layout::{Constraint, Direction, Layout},
     Frame, Terminal,
 };
 
 use crate::Day;
 
-use self::day::DayAnime;
+use self::week::WeekAnime;
 
 pub mod day;
+pub mod week;
 
 pub fn run(days: &mut [Day]) -> io::Result<()> {
     // setup terminal
@@ -57,16 +57,5 @@ fn draw<B: Backend>(terminal: &mut Terminal<B>, days: &mut [Day]) -> io::Result<
 
 fn ui<B: Backend>(f: &mut Frame<B>, days: &mut [Day]) {
     let size = f.size();
-
-    let mut constraints: Vec<Constraint> = days.iter().map(|_| Constraint::Length(20)).collect();
-    constraints.push(Constraint::Min(0));
-
-    let layout = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints(constraints)
-        .split(size);
-
-    days.iter().enumerate().for_each(|(i, day)| {
-        f.render_widget(DayAnime { day: day.clone() }, layout[i]);
-    });
+    f.render_widget(WeekAnime::new(days.to_vec()), size);
 }
