@@ -1,13 +1,16 @@
 use reqwest::Result;
 use scraper::{ElementRef, Html, Selector};
 use ui::run;
+use util::get_today_weekday;
 
 mod ui;
+mod util;
 
 #[derive(Default, Clone)]
 pub struct Day {
     pub anime: Vec<Anime>,
     pub week: String,
+    pub is_today: bool,
 }
 
 #[derive(Default, Clone)]
@@ -33,9 +36,12 @@ async fn get_html() -> Result<String> {
 }
 
 fn get_days(doc: &ElementRef) -> Vec<Day> {
+    let weekday = get_today_weekday();
+
     let selector = Selector::parse(".day-list").unwrap();
     doc.select(&selector)
-        .map(|dom| {
+        .enumerate()
+        .map(|(i, dom)| {
             let selector = Selector::parse(".day-title").unwrap();
             let week = dom
                 .select(&selector)
@@ -46,6 +52,7 @@ fn get_days(doc: &ElementRef) -> Vec<Day> {
 
             Day {
                 anime: get_anime_list(&dom),
+                is_today: i as u8 == weekday - 1,
                 week,
             }
         })

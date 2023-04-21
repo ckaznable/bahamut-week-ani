@@ -1,6 +1,7 @@
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Direction, Layout, Rect},
+    style::{Color, Style},
     widgets::{Block, Borders, Paragraph, Widget},
 };
 
@@ -11,7 +12,6 @@ static WEEK_HEIGHT: u16 = 3;
 
 pub struct DayAnime {
     pub day: Day,
-    pub is_today: bool,
 }
 
 impl DayAnime {
@@ -71,6 +71,13 @@ impl Widget for DayAnime {
             }
         });
 
-        Block::default().borders(Borders::ALL).render(outer[0], buf);
+        Block::default()
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(if self.day.is_today {
+                Color::Yellow
+            } else {
+                Color::White
+            }))
+            .render(outer[0], buf);
     }
 }

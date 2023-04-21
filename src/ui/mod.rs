@@ -67,12 +67,6 @@ fn ui<B: Backend>(f: &mut Frame<B>, days: &mut [Day]) {
         .split(size);
 
     days.iter().enumerate().for_each(|(i, day)| {
-        f.render_widget(
-            DayAnime {
-                day: day.clone(),
-                is_today: false,
-            },
-            layout[i],
-        );
+        f.render_widget(DayAnime { day: day.clone() }, layout[i]);
     });
 }
