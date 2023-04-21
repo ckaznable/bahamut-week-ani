@@ -1,5 +1,5 @@
 use reqwest::Result;
-use scraper::{Selector, ElementRef, Html};
+use scraper::{ElementRef, Html, Selector};
 use ui::run;
 
 mod ui;
@@ -29,19 +29,16 @@ async fn main() -> Result<()> {
 
 async fn get_html() -> Result<String> {
     let url = "https://ani.gamer.com.tw/";
-    reqwest::get(url)
-        .await?
-        .text()
-        .await
+    reqwest::get(url).await?.text().await
 }
 
 fn get_days(doc: &ElementRef) -> Vec<Day> {
     let selector = Selector::parse(".day-list").unwrap();
     doc.select(&selector)
-        .into_iter()
         .map(|dom| {
             let selector = Selector::parse(".day-title").unwrap();
-            let week = dom.select(&selector)
+            let week = dom
+                .select(&selector)
                 .next()
                 .unwrap()
                 .text()
@@ -62,25 +59,10 @@ fn get_anime_list(doc: &ElementRef) -> Vec<Anime> {
     let ep_selector = Selector::parse(".text-anime-number").unwrap();
 
     doc.select(&selector)
-        .into_iter()
-        .map(|dom| {
-            Anime {
-                time: dom.select(&time_selector)
-                    .next()
-                    .unwrap()
-                    .text()
-                    .collect(),
-                name: dom.select(&name_selector)
-                    .next()
-                    .unwrap()
-                    .text()
-                    .collect(),
-                ep: dom.select(&ep_selector)
-                    .next()
-                    .unwrap()
-                    .text()
-                    .collect(),
-            }
+        .map(|dom| Anime {
+            time: dom.select(&time_selector).next().unwrap().text().collect(),
+            name: dom.select(&name_selector).next().unwrap().text().collect(),
+            ep: dom.select(&ep_selector).next().unwrap().text().collect(),
         })
         .collect::<Vec<Anime>>()
 }

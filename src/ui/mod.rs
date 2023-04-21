@@ -1,7 +1,15 @@
 use std::io;
 
-use crossterm::{event::{KeyCode, self, Event, DisableMouseCapture}, terminal::{enable_raw_mode, disable_raw_mode, LeaveAlternateScreen, EnterAlternateScreen}, execute};
-use ratatui::{backend::{Backend, CrosstermBackend}, Frame, Terminal};
+use crossterm::{
+    event::{self, DisableMouseCapture, Event, KeyCode},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
+use ratatui::{
+    backend::{Backend, CrosstermBackend},
+    layout::{Constraint, Direction, Layout},
+    Frame, Terminal,
+};
 
 use crate::Day;
 
@@ -50,8 +58,21 @@ fn draw<B: Backend>(terminal: &mut Terminal<B>, days: &mut [Day]) -> io::Result<
 fn ui<B: Backend>(f: &mut Frame<B>, days: &mut [Day]) {
     let size = f.size();
 
-    f.render_widget(DayAnime {
-        day: days.get(0).unwrap().clone(),
-        is_today: false,
-    }, size);
+    let mut constraints: Vec<Constraint> = days.iter().map(|_| Constraint::Length(20)).collect();
+    constraints.push(Constraint::Min(0));
+
+    let layout = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(constraints)
+        .split(size);
+
+    days.iter().enumerate().for_each(|(i, day)| {
+        f.render_widget(
+            DayAnime {
+                day: day.clone(),
+                is_today: false,
+            },
+            layout[i],
+        );
+    });
 }
